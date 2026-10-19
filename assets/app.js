@@ -4258,7 +4258,8 @@
     else if (UI.view === 'terms' || UI.view === 'privacy' || UI.view === 'licenses') content = legalView(UI.view);
     else content = homeView();
     app.innerHTML = shell(content, UI.view);
-    if (!S.onboarded && !onboardRoot.innerHTML) {
+      const isLegal = UI.view === 'terms' || UI.view === 'privacy' || UI.view === 'licenses';
+      if (!S.onboarded && !isLegal && !onboardRoot.innerHTML) {
       openOnboarding();
     }
     if (UI.session) renderSession();
