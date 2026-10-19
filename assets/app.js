@@ -9,7 +9,7 @@
   const MEDIA = window.FORGE_EXERCISE_MEDIA || {};
   const BY_ID = new Map(EX.map((e) => [e.id, e]));
   const STORAGE_KEY = 'forge_state_v2';
-  const VIEWS = ['home', 'library', 'plan', 'log', 'nutrition', 'research'];
+  const VIEWS = ['home', 'library', 'plan', 'log', 'nutrition', 'research', 'terms', 'privacy', 'licenses'];
 
   const GOALS = {
     hypertrophy: { label: '增肌', desc: '在可恢复的范围里，把训练量变成肌肉', hero: '把每一组，练成可复利的刺激' },
@@ -77,6 +77,7 @@
     target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>',
     bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="m13 2-8 12h6l-1 8 9-13h-6V2Z"/></svg>',
     info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>',
     book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path d="M4 5.5V21.5M8 7h8M8 11h7"/></svg>',
     user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 3.5-6 8-6s7.2 2 8 6"/></svg>',
     download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>',
@@ -1180,6 +1181,14 @@
             </div>
           </header>
           <main class="view" id="view">${content}</main>
+          <footer class="legal-foot">
+            <nav aria-label="法律信息">
+              <a href="#terms" data-action="nav" data-view="terms">用户协议</a>
+              <a href="#privacy" data-action="nav" data-view="privacy">隐私政策</a>
+              <a href="#licenses" data-action="nav" data-view="licenses">第三方许可</a>
+            </nav>
+            <span>© ${new Date().getFullYear()} 炼 FORGE · 训练与营养</span>
+          </footer>
         </div>
         <nav class="tabbar" aria-label="主导航">${navMarkup(view)}</nav>
       </div>`;
@@ -3177,6 +3186,146 @@
       <div class="disclaimer" style="margin-top:18px"><b>免责声明：</b>本应用是教育与训练辅助工具，不构成医疗建议、康复处方或比赛备赛指导。运动员数据来自公开资料，比赛体重、体脂和训练量可能随赛季变化；媒体数据可能存在误差。若有疼痛、伤病、心血管或代谢疾病，请先咨询医生或合格教练。</div>`;
   }
 
+  /* ---------- Legal ---------- */
+
+  const LEGAL_UPDATED = '2026 年 10 月 19 日';
+  const CONTACT_URL = 'https://github.com/jl0859598-del/forge-fitness/issues';
+
+  function legalTabs(active) {
+    const tabs = [
+      ['terms', '用户协议'],
+      ['privacy', '隐私政策'],
+      ['licenses', '第三方许可']
+    ];
+    return `<div class="legal-tabs">${tabs.map(([id, label]) =>
+      `<a class="legal-tab ${active === id ? 'active' : ''}" href="#${id}" data-action="nav" data-view="${id}">${label}</a>`).join('')}</div>`;
+  }
+
+  function termsBody() {
+    return `
+      <p class="legal-lead">本协议是你与「炼 FORGE」运营者之间的约定。访问或使用本应用，即表示你已阅读并同意以下条款；如果你不同意，请停止使用。</p>
+
+      <h2>1. 服务内容与性质</h2>
+      <p>本应用提供动作库、个性化训练计划、训练与体重记录、营养建议、拍照估热量（需后端支持）与本地视频动作分析等功能。所有内容属于一般健身与营养教育信息，<b>不构成医疗诊断、治疗、康复处方或营养处方</b>，不能替代医生、康复治疗师或注册营养师的面对面评估。</p>
+
+      <h2>2. 使用许可</h2>
+      <p>在你遵守本协议的前提下，运营者授予你一项个人的、不可转让、非独占的许可，用于个人健身与健康管理，也可用于教练自己的教学与客户服务。你不得：</p>
+      <ul>
+        <li>复制、转售、出租或再许可本应用，或将其实质部分作为你的产品对外提供；</li>
+        <li>用自动化脚本批量抓取动作库、动作图片、研究摘要等内容；</li>
+        <li>移除或篡改版权、许可与免责声明标识；</li>
+        <li>将本应用用于违法、误导他人或可能造成伤害的用途。</li>
+      </ul>
+
+      <h2>3. 训练风险与自我评估</h2>
+      <p>抗阻训练、有氧运动与饮食调整都存在风险。你应根据自身健康状况、动作能力和恢复情况调整强度；出现疼痛、眩晕、胸闷或关节不适时应立即停止并就医。有既往伤病、心血管疾病、糖尿病、肾病、孕期或哺乳期、进食障碍史者，应在专业人士指导下使用。</p>
+
+      <h2>4. 数据与账号</h2>
+      <p>当前版本不设账号系统，训练、体重与饮食数据默认保存在你所使用设备的浏览器中（localStorage），运营者无法访问。清理浏览器数据可能导致记录丢失，请使用应用内「导出数据」定期备份。</p>
+
+      <h2>5. 付费服务</h2>
+      <p>当前版本免费。若未来推出付费功能，运营者会在购买前明确展示价格、计费周期、自动续费规则与退款方式，并由你通过支付渠道再次确认；未完成确认前不会产生任何费用。</p>
+
+      <h2>6. 知识产权</h2>
+      <p>本应用的界面、文案、图标、动作条目与行程轨迹图由运营者创作，归运营者所有。第三方素材（标准动作演示图、姿态识别模型、研究文献等）按各自许可使用，详见「第三方许可」。外部视频与论文的版权归原作者，本应用只提供链接与摘要。</p>
+
+      <h2>7. 服务的变更与中止</h2>
+      <p>运营者可能更新、调整或停止部分功能。对免费功能不承诺永久提供；对已付费的服务，按购买时展示的条款处理。</p>
+
+      <h2>8. 责任限制</h2>
+      <p>在适用法律允许的最大范围内，运营者不对因使用或无法使用本应用而造成的间接损失、数据丢失或训练伤害承担责任。本条款不排除依法不得排除的责任。</p>
+
+      <h2>9. 协议更新与争议解决</h2>
+      <p>运营者可更新本协议，重大变更会在应用内提示并更新日期。本协议适用中华人民共和国法律；协商不成时，提交运营者所在地有管辖权的人民法院解决。</p>
+
+      <h2>10. 联系方式</h2>
+      <p>问题、投诉或合作请通过 <a href="${CONTACT_URL}" target="_blank" rel="noopener noreferrer">项目 issue 页面</a> 联系。</p>`;
+  }
+
+  function privacyBody() {
+    return `
+      <p class="legal-lead">本应用按「数据默认留在你自己的设备上」设计。下面说明我们处理哪些信息、为什么处理，以及你如何导出或删除它们。</p>
+
+      <h2>1. 我们处理哪些信息</h2>
+      <ul>
+        <li><b>你主动填写的资料：</b>昵称、性别、年龄、身高、体重、目标体重、训练经验、器械条件、日常活动量、饮食类型、需要避开的部位与重点部位。</li>
+        <li><b>使用中产生的记录：</b>训练记录（动作、组数、次数、重量、RPE）、体重记录、饮食记录、动作分析摘要。</li>
+        <li><b>存储位置：</b>上述信息保存在你浏览器的 localStorage 中，不会上传到运营者的服务器。</li>
+      </ul>
+
+      <h2>2. 我们不收集的信息</h2>
+      <p>不要求手机号、邮箱、身份证等实名信息；不使用第三方广告或行为追踪脚本；不做设备指纹，不读取通讯录、位置或相册（除非你主动选择照片或视频）。</p>
+
+      <h2>3. 相机、照片与视频</h2>
+      <p><b>拍照估热量：</b>需要你主动拍摄或选择照片。若所在版本配置了后端识别服务，照片会发送到运营者配置的模型服务（当前为 OpenAI API）用于识别食物；识别结果返回给你，运营者不长期保存照片。当前公网静态版不提供该功能。</p>
+      <p><b>个人训练视频：</b>使用本机浏览器内的 MediaPipe 模型逐帧分析，视频不会上传。只有你手动点击「保存分析摘要」时，次数、活动范围、左右差异和分数等摘要会写入本机记录。</p>
+
+      <h2>4. 托管与外部链接</h2>
+      <p>站点托管在 GitHub Pages，访问时 GitHub 可能按其隐私声明记录 IP 地址、User-Agent 等基础访问日志。点击 YouTube、哔哩哔哩、PubMed 等外部链接后会跳转到相应站点，适用其各自的隐私政策。</p>
+
+      <h2>5. 未成年人</h2>
+      <p>未满 14 周岁的用户应在监护人的同意与指导下使用本应用。</p>
+
+      <h2>6. 你的权利</h2>
+      <p>你可以随时在「个人资料 → 数据与设置」中导出全部数据（JSON 备份）、更正资料，或使用「清空所有数据」删除本机记录；也可以通过浏览器设置清除本站点数据。删除后无法恢复，请先备份。</p>
+
+      <h2>7. 保存期限与跨境传输</h2>
+      <p>数据保存在你的设备上，直到你自行删除。当前版本不会将你的训练与体重数据传出设备；若未来提供账号与云同步，会在启用前单独告知处理范围并征得你的同意。</p>
+
+      <h2>8. 政策更新</h2>
+      <p>本政策更新后会在应用内发布并修改页面顶部日期。对处理方式有实质影响的变更，会在你下次使用时提示。</p>
+
+      <h2>9. 联系我们</h2>
+      <p>隐私相关问题请通过 <a href="${CONTACT_URL}" target="_blank" rel="noopener noreferrer">项目 issue 页面</a> 联系，我们会在合理期限内答复。</p>`;
+  }
+
+  function licensesBody() {
+    return `
+      <p class="legal-lead">本应用使用了以下开放素材与开源组件。我们保留其许可与署名信息，并只在素材与动作定义匹配时展示，避免错误示范。</p>
+
+      <h2>1. 标准动作演示图</h2>
+      <p>来源 Free Exercise DB，<b>Unlicense / 公有领域</b>，共 126 个动作、252 张开始位与结束位照片，已随站点本地托管（<code>assets/media/</code>）。原始库：<a href="https://github.com/yuhonas/free-exercise-db" target="_blank" rel="noopener noreferrer">github.com/yuhonas/free-exercise-db</a>。</p>
+
+      <h2>2. 姿态识别</h2>
+      <p>MediaPipe Tasks Vision 1.1.1，<b>Apache License 2.0</b>；Pose Landmarker Lite 模型来自 Google AI Edge / MediaPipe，按模型卡以 Apache-2.0 授权。许可与版权声明保留在 <code>assets/vendor/NOTICE.txt</code>，完整许可文本见 <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener noreferrer">apache.org/licenses/LICENSE-2.0</a>。模型在你的设备本地运行。</p>
+
+      <h2>3. 研究文献</h2>
+      <p>研究页面引用的是论文的结论摘要与出处，不转载全文，也不分发受版权保护的 PDF。完整列表：</p>
+      <ol class="legal-refs">
+        ${STUDIES.map((s) => `<li><a href="${s.url}" target="_blank" rel="noopener noreferrer">${esc(s.cite)}</a><span>${esc(s.title)}</span></li>`).join('')}
+      </ol>
+
+      <h2>4. 教练视频与运动员资料</h2>
+      <p>教练视频仅以官方频道与 B 站搜索页外链呈现，本应用不下载、不转存、不重新托管视频。运动员的身高、比赛体重、成绩与训练原则来自公开报道与访谈，属于公开事实的整理，不代表其本人或团队对本应用的认可或背书。</p>
+
+      <h2>5. 字体与图标</h2>
+      <p>界面使用设备系统字体，不内嵌第三方字体文件；图标为项目自绘 SVG。</p>
+
+      <h2>6. 商标声明</h2>
+      <p>Google、MediaPipe、YouTube、哔哩哔哩、PubMed 等名称与标识为其各自所有者的商标。本应用与上述公司无隶属、合作或背书关系。</p>
+
+      <h2>7. 权利通知</h2>
+      <p>如果你认为本应用使用的某段内容侵犯了你的权利，请通过 <a href="${CONTACT_URL}" target="_blank" rel="noopener noreferrer">项目 issue 页面</a> 提供权属证明与具体位置，我们会核实并在合理期限内处理。</p>`;
+  }
+
+  function legalView(kind) {
+    const meta = {
+      terms: { eyebrow: 'Terms of Service', title: '用户协议', sub: '使用本应用前请阅读；重点说明服务性质、使用许可与训练风险。', body: termsBody() },
+      privacy: { eyebrow: 'Privacy Policy', title: '隐私政策', sub: '数据默认保存在你的设备上；说明照片、视频与外部服务的处理方式。', body: privacyBody() },
+      licenses: { eyebrow: 'Licenses & Credits', title: '第三方许可', sub: '开放素材、开源组件、研究文献与外链内容的授权与署名。', body: licensesBody() }
+    }[kind];
+    return `
+      <div class="page-head">
+        <div><div class="eyebrow">${meta.eyebrow}</div><h1 class="page-title">${meta.title}</h1><p class="page-sub">${meta.sub}</p></div>
+      </div>
+      ${legalTabs(kind)}
+      <article class="legal-doc">
+        <div class="legal-meta">最后更新：${LEGAL_UPDATED}</div>
+        ${meta.body}
+      </article>
+      <div class="disclaimer" style="margin-top:16px"><b>提示：</b>以上文本为应用内通用条款，不构成法律意见。正式对外收费前，建议由熟悉当地法规的专业人士结合你的经营主体复核一次。</div>`;
+  }
+
   /* ---------- Profile ---------- */
 
   function profileSheetHTML() {
@@ -3228,6 +3377,9 @@
                 <button class="settings-row" data-action="import-data"><span>${ICONS.upload}导入数据</span><small>恢复备份</small></button>
                 <button class="settings-row" data-action="open-onboarding"><span>${ICONS.spark}重新做引导</span><small>重新定制</small></button>
                 <button class="settings-row" data-action="reset-data" style="color:var(--red)"><span style="color:var(--red)">${ICONS.trash}清空所有数据</span><small>不可撤销</small></button>
+                <a class="settings-row" href="#terms" data-action="nav" data-view="terms"><span>${ICONS.book}用户协议</span><small>服务条款</small></a>
+                <a class="settings-row" href="#privacy" data-action="nav" data-view="privacy"><span>${ICONS.shield}隐私政策</span><small>数据处理</small></a>
+                <a class="settings-row" href="#licenses" data-action="nav" data-view="licenses"><span>${ICONS.info}第三方许可</span><small>素材与文献</small></a>
               </div>
               <input type="file" id="import-file" accept="application/json,.json" hidden>
             </div>
@@ -4103,6 +4255,7 @@
     else if (UI.view === 'log') content = logView();
     else if (UI.view === 'nutrition') content = nutritionView();
     else if (UI.view === 'research') content = researchView();
+    else if (UI.view === 'terms' || UI.view === 'privacy' || UI.view === 'licenses') content = legalView(UI.view);
     else content = homeView();
     app.innerHTML = shell(content, UI.view);
     if (!S.onboarded && !onboardRoot.innerHTML) {
