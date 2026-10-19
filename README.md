@@ -99,15 +99,19 @@ OPENAI_VISION_MODEL=gpt-6-astra
 
 ## 部署到公网
 
-已上线：<https://jl0859598-del.github.io/forge-fitness/>
+商用站点（Netlify，允许商业使用）：<https://forge-train.netlify.app/>
 
-- 源码与发布分支：<https://github.com/jl0859598-del/forge-fitness>（`main` 分支根目录即发布内容，GitHub Pages 自动构建）
-- 更新方式：修改本目录后把静态文件同步到仓库并 `git push`，1 分钟内自动生效
+- 镜像站点（GitHub Pages，仅作预览）：<https://jl0859598-del.github.io/forge-fitness/>
+- 源码与发布分支：<https://github.com/jl0859598-del/forge-fitness>（`main` 分支根目录即发布内容）
+- Netlify 项目面板：<https://app.netlify.com/projects/forge-train>
+- 更新方式一：`git push` 后，在 Netlify 项目页重新拖入整包（或把仓库同步到 Netlify 实现自动部署）
+- 更新方式二：本地改完把站点目录整体拖到 <https://app.netlify.com/drop>，要求已登录同一账号
 - 手机上打开链接后，用“添加到主屏幕”安装为全屏应用；首次加载会缓存到本机，之后可离线打开动作库
 - 252 张标准动作图已打包进站点（`assets/media/`），不再依赖 GitHub raw 外链
 - 应用内已有 `/用户协议`、`/隐私政策`、`/第三方许可` 三页（`#terms`、`#privacy`、`#licenses`），页脚与个人资料设置里都有入口
+- `_headers` 已生效：`/assets/vendor/*` 一年 immutable 缓存、`sw.js` 不缓存、基础安全响应头
 
-注意：GitHub Pages 免费版的条款不允许把站点当作主要面向商业交易或在线业务的免费主机。开始收费或挂会员前，应迁移到允许商用的托管（Netlify / Cloudflare Pages），站点已附带 `_headers`（安全响应头与缓存策略），迁移时直接整目录上传即可，无需改代码。
+注意：GitHub Pages 免费版条款不允许把它当作主要面向商业交易或在线业务的免费主机。正式对外收费后，应以 Netlify 域名为准，并考虑关闭 GitHub Pages 镜像或将其改为私有预览。
 
 静态版中拍照估热量不可用（`/api/analyze` 需要服务端）。若要公网也能用，需要把 `server.py` 中的 `/api/analyze` 改成 Netlify/Vercel/Cloudflare 的 Serverless Function 并配置 `OPENAI_API_KEY` 环境变量；不要把 API Key 写进 `assets/app.js`。
 

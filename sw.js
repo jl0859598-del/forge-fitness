@@ -1,14 +1,14 @@
-const CACHE = 'forge-v25';
+const CACHE = 'forge-v26';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './assets/styles.css?v=25',
-  './assets/exercises.js?v=25',
-  './assets/exercises-extra.js?v=25',
-  './assets/exercise-media.js?v=25',
-  './assets/knowledge.js?v=25',
-  './assets/app.js?v=25',
+  './assets/styles.css?v=26',
+  './assets/exercises.js?v=26',
+  './assets/exercises-extra.js?v=26',
+  './assets/exercise-media.js?v=26',
+  './assets/knowledge.js?v=26',
+  './assets/app.js?v=26',
   './icons/icon.svg',
   './icons/icon-180.png',
   './icons/icon-192.png',
