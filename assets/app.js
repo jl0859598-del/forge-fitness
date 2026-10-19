@@ -9,7 +9,17 @@
   const MEDIA = window.FORGE_EXERCISE_MEDIA || {};
   const BY_ID = new Map(EX.map((e) => [e.id, e]));
   const STORAGE_KEY = 'forge_state_v2';
-  const VIEWS = ['home', 'library', 'plan', 'log', 'nutrition', 'research', 'terms', 'privacy', 'licenses'];
+  const VIEWS = ['home', 'library', 'plan', 'log', 'nutrition', 'research', 'pro', 'terms', 'privacy', 'licenses'];
+
+  // 会员与计价：改价格、放开/收紧免费额度都在这里
+  const COMMERCE = {
+    gate: true,
+    freeAnalysesPerMonth: 3,
+    monthly: 29,
+    yearly: 199,
+    coachMonthly: 99,
+    contact: 'https://github.com/jl0859598-del/forge-fitness/issues'
+  };
 
   const GOALS = {
     hypertrophy: { label: '增肌', desc: '在可恢复的范围里，把训练量变成肌肉', hero: '把每一组，练成可复利的刺激' },
@@ -131,6 +141,8 @@
       logs: [],
       sessions: [],
       analyses: [],
+      analysisRuns: [],
+      license: null,
       intake: {},
       onboarded: false,
       createdAt: Date.now()
@@ -150,6 +162,8 @@
         logs: Array.isArray(parsed.logs) ? parsed.logs : [],
         sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
         analyses: Array.isArray(parsed.analyses) ? parsed.analyses : [],
+        analysisRuns: Array.isArray(parsed.analysisRuns) ? parsed.analysisRuns : [],
+        license: parsed.license && typeof parsed.license === 'object' ? parsed.license : null,
         intake: parsed.intake && typeof parsed.intake === 'object' ? parsed.intake : {}
       };
     } catch (e) {
@@ -166,6 +180,43 @@
     } catch (e) {
       memoryOnly = true;
     }
+  }
+
+  function licenseInfo() {
+    const lic = S.license;
+    if (!lic || !lic.exp) return { active: false, plan: 'free', exp: '', days: 0, order: '' };
+    const end = new Date(lic.exp + 'T23:59:59').getTime();
+    const active = Number.isFinite(end) && end > Date.now();
+    return {
+      active,
+      plan: lic.plan === 'coach' ? 'coach' : 'pro',
+      exp: lic.exp,
+      order: lic.order || '',
+      days: window.FORGE_LICENSE ? FORGE_LICENSE.daysLeft(lic.exp) : 0
+    };
+  }
+
+  function isPro() {
+    return licenseInfo().active;
+  }
+
+  function runsThisMonth() {
+    const month = new Date().toISOString().slice(0, 7);
+    return (S.analysisRuns || []).filter((d) => String(d).slice(0, 7) === month).length;
+  }
+
+  function freeAnalysesLeft() {
+    return Math.max(0, COMMERCE.freeAnalysesPerMonth - runsThisMonth());
+  }
+
+  function canAnalyze() {
+    return !COMMERCE.gate || isPro() || freeAnalysesLeft() > 0;
+  }
+
+  function planLabel(plan) {
+    if (plan === 'coach') return '教练版';
+    if (plan === 'pro') return 'Pro 会员';
+    return '免费版';
   }
 
   function routeFromHash() {
@@ -1183,6 +1234,7 @@
           <main class="view" id="view">${content}</main>
           <footer class="legal-foot">
             <nav aria-label="法律信息">
+              <a href="#pro" data-action="nav" data-view="pro">会员</a>
               <a href="#terms" data-action="nav" data-view="terms">用户协议</a>
               <a href="#privacy" data-action="nav" data-view="privacy">隐私政策</a>
               <a href="#licenses" data-action="nav" data-view="licenses">第三方许可</a>
@@ -2096,6 +2148,10 @@
   async function analyzePersonalVideo() {
     const ex = BY_ID.get(UI.analysis.exId);
     if (!ex || !UI.analysis.videoUrl || UI.analysis.analyzing) return;
+    if (!canAnalyze()) {
+      openProSheet('quota');
+      return;
+    }
     UI.analysis.analyzing = true;
     UI.analysis.progress = 0;
     UI.analysis.error = '';
@@ -2120,6 +2176,9 @@
         if (text) text.textContent = `${Math.round(p * 100)}% · 正在提取关节点`;
       });
       UI.analysis.result = result;
+      S.analysisRuns = Array.isArray(S.analysisRuns) ? S.analysisRuns : [];
+      S.analysisRuns.push(new Date().toISOString().slice(0, 10));
+      save();
     } catch (error) {
       UI.analysis.error = error && error.message ? error.message : '视频分析失败，请换一个视频重试';
     } finally {
@@ -3328,6 +3387,117 @@
 
   /* ---------- Profile ---------- */
 
+  /* ---------- Membership ---------- */
+
+  function licenseStatusHTML() {
+    const info = licenseInfo();
+    if (info.active) {
+      return `<div class="license-card active">
+        <div class="license-head"><span class="pro-badge">${planLabel(info.plan)}</span><span>剩余 ${info.days} 天</span></div>
+        <p>有效期至 <b>${esc(info.exp)}</b>${info.order ? ` · 订单 ${esc(info.order)}` : ''}</p>
+        <p class="license-note">凭证保存在本机浏览器，换设备时重新粘贴同一激活码即可。</p>
+        <button class="btn btn-ghost btn-sm" data-action="clear-license">解除本机凭证</button>
+      </div>`;
+    }
+    return `<div class="license-card">
+      <div class="license-head"><span class="pro-badge free">免费版</span><span>本月剩余 ${freeAnalysesLeft()} 次视频分析</span></div>
+      <p class="license-note">Pro 解锁不限次数的个人动作视频分析，以及后续上线的拍照估热量与教练端功能。</p>
+    </div>`;
+  }
+
+  function licenseFormHTML() {
+    return `<form id="license-form" class="license-form">
+      <label for="license-code">激活码</label>
+      <textarea class="input license-input" id="license-code" name="code" rows="3" placeholder="粘贴以 FORGE1. 开头的激活码" required></textarea>
+      <button class="btn btn-block" type="submit">${ICONS.check}激活会员</button>
+      <p class="license-note">激活码由购买后人工发放，全程离线校验；不会上传激活码或个人信息。</p>
+    </form>`;
+  }
+
+  function openProSheet(reason) {
+    const info = licenseInfo();
+    const quotaNote = reason === 'quota'
+      ? `<div class="license-alert">${ICONS.alert}本月 ${COMMERCE.freeAnalysesPerMonth} 次免费视频分析已用完。开通 Pro 可不限次数分析。</div>`
+      : '';
+    openSheet(`
+      <div class="sheet-backdrop">
+        <div class="sheet" role="dialog" aria-modal="true" aria-label="Pro 会员" data-stop="1">
+          <div class="sheet-grab"></div>
+          <div class="sheet-head">
+            <div><div class="eyebrow">Membership</div><div class="sheet-title">Pro 会员</div></div>
+            <button class="sheet-close" data-action="close-sheet" aria-label="关闭">${ICONS.close}</button>
+          </div>
+          <div class="sheet-body">
+            ${quotaNote}
+            ${licenseStatusHTML()}
+            <div class="price-grid">
+              <div class="price-card"><span>月付</span><b>¥${COMMERCE.monthly}</b><em>30 天</em></div>
+              <div class="price-card featured"><span>年付</span><b>¥${COMMERCE.yearly}</b><em>365 天 · 省 ${COMMERCE.monthly * 12 - COMMERCE.yearly} 元</em></div>
+              <div class="price-card"><span>教练版</span><b>¥${COMMERCE.coachMonthly}</b><em>每月 · 学员管理</em></div>
+            </div>
+            ${info.active ? '' : `
+              <div class="license-buy">
+                <b>怎么购买</b>
+                <p>微信或支付宝转账，备注你的订单号；确认后 24 小时内发放激活码。</p>
+                <a class="btn btn-sm" href="${COMMERCE.contact}" target="_blank" rel="noopener noreferrer">${ICONS.external}联系购买</a>
+              </div>`}
+            ${licenseFormHTML()}
+          </div>
+        </div>
+      </div>`);
+  }
+
+  async function activateLicense(code) {
+    const result = await window.FORGE_LICENSE.verify(code);
+    if (!result.ok) {
+      toast(result.reason || '激活码无效', 'bad');
+      return;
+    }
+    S.license = {
+      code: window.FORGE_LICENSE.normalize(code),
+      plan: result.plan,
+      exp: result.exp,
+      order: result.order,
+      activatedAt: Date.now()
+    };
+    save();
+    closeSheet();
+    toast(`已激活 ${planLabel(result.plan)}，有效期至 ${result.exp}`, 'ok');
+    render();
+  }
+
+  function proView() {
+    const info = licenseInfo();
+    return `
+      <div class="page-head">
+        <div><div class="eyebrow">Membership</div><h1 class="page-title">会员</h1><p class="page-sub">免费版保留动作库、训练计划与记录；Pro 解锁不限次数的动作视频分析。</p></div>
+      </div>
+      ${licenseStatusHTML()}
+      <div class="price-grid" style="margin-top:12px">
+        <div class="price-card"><span>月付</span><b>¥${COMMERCE.monthly}</b><em>30 天</em></div>
+        <div class="price-card featured"><span>年付</span><b>¥${COMMERCE.yearly}</b><em>365 天 · 省 ${COMMERCE.monthly * 12 - COMMERCE.yearly} 元</em></div>
+        <div class="price-card"><span>教练版</span><b>¥${COMMERCE.coachMonthly}</b><em>每月 · 学员管理</em></div>
+      </div>
+      <section class="section">
+        <div class="section-head"><h2 class="section-title">Pro 包含什么</h2></div>
+        <div class="card card-flat" style="font-size:12px;line-height:1.9;color:var(--muted)">
+          <p>· 个人训练视频分析不限次数（免费版每月 ${COMMERCE.freeAnalysesPerMonth} 次）</p>
+          <p>· 逐帧关节角度、左右差异与节奏反馈</p>
+          <p>· 拍照估热量（需后端服务，公网版上线后对 Pro 开放）</p>
+          <p>· 教练版可批量点评学员视频、导出学员报告</p>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-head"><h2 class="section-title">购买与激活</h2><span class="section-link">人工发放，24 小时内</span></div>
+        <div class="license-buy">
+          <p>微信或支付宝转账并备注订单号，收到激活码后在下方粘贴即可；激活码在本机离线校验。</p>
+          <a class="btn btn-sm" href="${COMMERCE.contact}" target="_blank" rel="noopener noreferrer">${ICONS.external}联系购买</a>
+        </div>
+        ${licenseFormHTML()}
+      </section>
+      <div class="disclaimer" style="margin-top:14px"><b>说明：</b>激活凭证仅保存在本机浏览器，不绑定账号、不上传服务器；清理浏览器数据后需要重新激活。会员是数字服务，开通后不支持退款，请在购买前确认功能符合你的需求。</div>`;
+  }
+
   function profileSheetHTML() {
     const p = S.profile;
     const limits = LIMITS.map((l) => `<label class="check-pill"><input type="checkbox" name="limitations" value="${l}" ${p.limitations.includes(l) ? 'checked' : ''}><span>${l}部不适</span></label>`).join('');
@@ -3378,6 +3548,7 @@
                 <button class="settings-row" data-action="open-onboarding"><span>${ICONS.spark}重新做引导</span><small>重新定制</small></button>
                 <button class="settings-row" data-action="reset-data" style="color:var(--red)"><span style="color:var(--red)">${ICONS.trash}清空所有数据</span><small>不可撤销</small></button>
                 <a class="settings-row" href="#terms" data-action="nav" data-view="terms"><span>${ICONS.book}用户协议</span><small>服务条款</small></a>
+                <a class="settings-row" href="#pro" data-action="nav" data-view="pro"><span>${ICONS.spark}会员与激活码</span><small>${isPro() ? planLabel(licenseInfo().plan) : '免费版'}</small></a>
                 <a class="settings-row" href="#privacy" data-action="nav" data-view="privacy"><span>${ICONS.shield}隐私政策</span><small>数据处理</small></a>
                 <a class="settings-row" href="#licenses" data-action="nav" data-view="licenses"><span>${ICONS.info}第三方许可</span><small>素材与文献</small></a>
               </div>
@@ -4008,6 +4179,18 @@
       case 'open-profile':
         openProfile();
         break;
+      case 'open-pro':
+        openProSheet();
+        break;
+      case 'clear-license':
+        if (window.confirm('确定移除本机的会员凭证吗？再次使用需要重新激活。')) {
+          S.license = null;
+          save();
+          closeSheet();
+          toast('已移除本机会员凭证', 'ok');
+          render();
+        }
+        break;
       case 'lib-group':
         UI.lib.group = el.dataset.value || '全部';
         render();
@@ -4234,6 +4417,12 @@
     if (event.target.id === 'weight-form') saveWeightForm(event.target);
     else if (event.target.id === 'intake-form') saveIntakeForm(event.target);
     else if (event.target.id === 'profile-form') saveProfileForm(event.target);
+    else if (event.target.id === 'license-form') {
+      const input = event.target.querySelector('[name="code"]');
+      const value = input && input.value ? input.value : '';
+      if (!value.trim()) toast('请先粘贴激活码', 'bad');
+      else activateLicense(value);
+    }
   });
 
   window.addEventListener('hashchange', () => {
@@ -4255,6 +4444,7 @@
     else if (UI.view === 'log') content = logView();
     else if (UI.view === 'nutrition') content = nutritionView();
     else if (UI.view === 'research') content = researchView();
+    else if (UI.view === 'pro') content = proView();
     else if (UI.view === 'terms' || UI.view === 'privacy' || UI.view === 'licenses') content = legalView(UI.view);
     else content = homeView();
     app.innerHTML = shell(content, UI.view);
