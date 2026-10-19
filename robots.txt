@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jl0859598-del.github.io/forge-fitness/sitemap.xml

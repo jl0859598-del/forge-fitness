@@ -105,6 +105,9 @@ OPENAI_VISION_MODEL=gpt-6-astra
 - 更新方式：修改本目录后把静态文件同步到仓库并 `git push`，1 分钟内自动生效
 - 手机上打开链接后，用“添加到主屏幕”安装为全屏应用；首次加载会缓存到本机，之后可离线打开动作库
 - 252 张标准动作图已打包进站点（`assets/media/`），不再依赖 GitHub raw 外链
+- 应用内已有 `/用户协议`、`/隐私政策`、`/第三方许可` 三页（`#terms`、`#privacy`、`#licenses`），页脚与个人资料设置里都有入口
+
+注意：GitHub Pages 免费版的条款不允许把站点当作主要面向商业交易或在线业务的免费主机。开始收费或挂会员前，应迁移到允许商用的托管（Netlify / Cloudflare Pages），站点已附带 `_headers`（安全响应头与缓存策略），迁移时直接整目录上传即可，无需改代码。
 
 静态版中拍照估热量不可用（`/api/analyze` 需要服务端）。若要公网也能用，需要把 `server.py` 中的 `/api/analyze` 改成 Netlify/Vercel/Cloudflare 的 Serverless Function 并配置 `OPENAI_API_KEY` 环境变量；不要把 API Key 写进 `assets/app.js`。
 
