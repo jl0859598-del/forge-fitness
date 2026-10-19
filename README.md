@@ -103,9 +103,9 @@ OPENAI_VISION_MODEL=gpt-6-astra
 
 - 镜像站点（GitHub Pages，仅作预览）：<https://jl0859598-del.github.io/forge-fitness/>
 - 源码与发布分支：<https://github.com/jl0859598-del/forge-fitness>（`main` 分支根目录即发布内容）
-- Netlify 项目面板：<https://app.netlify.com/projects/forge-train>
-- 更新方式一：`git push` 后，在 Netlify 项目页重新拖入整包（或把仓库同步到 Netlify 实现自动部署）
-- 更新方式二：本地改完把站点目录整体拖到 <https://app.netlify.com/drop>，要求已登录同一账号
+- Netlify 项目面板：<https://app.netlify.com/projects/forge-train>（账号 jl0859598@gmail.com，团队 Forge Fitness）
+- Netlify 的 GitHub App 已安装，但项目与该仓库的连接还需在 Netlify 面板里点一次「Link repository → GitHub」（浏览器需允许弹窗）
+- 当前更新方式：本地改完打包，把整包拖到项目概览页的 “Already built it?” 上传区，几秒内部署完成
 - 手机上打开链接后，用“添加到主屏幕”安装为全屏应用；首次加载会缓存到本机，之后可离线打开动作库
 - 252 张标准动作图已打包进站点（`assets/media/`），不再依赖 GitHub raw 外链
 - 应用内已有 `/用户协议`、`/隐私政策`、`/第三方许可` 三页（`#terms`、`#privacy`、`#licenses`），页脚与个人资料设置里都有入口
