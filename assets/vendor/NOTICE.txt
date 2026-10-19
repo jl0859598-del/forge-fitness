@@ -1,0 +1,8 @@
+MediaPipe Tasks Vision 1.1.1
+Copyright 2023 Google LLC
+Licensed under the Apache License, Version 2.0.
+https://www.apache.org/licenses/LICENSE-2.0
+
+Pose Landmarker Lite model
+Google AI Edge / MediaPipe
+Used locally for pose estimation; no video is uploaded.
