@@ -109,7 +109,15 @@ OPENAI_VISION_MODEL=gpt-6-astra
 - 手机上打开链接后，用“添加到主屏幕”安装为全屏应用；首次加载会缓存到本机，之后可离线打开动作库
 - 252 张标准动作图已打包进站点（`assets/media/`），不再依赖 GitHub raw 外链
 - 应用内已有 `/用户协议`、`/隐私政策`、`/第三方许可` 三页（`#terms`、`#privacy`、`#licenses`），页脚与个人资料设置里都有入口
+- 会员页 `#pro`：免费版每月 3 次视频分析，Pro 不限次数；激活码离线校验（ECDSA P-256），不依赖账号或服务器
 - `_headers` 已生效：`/assets/vendor/*` 一年 immutable 缓存、`sw.js` 不缓存、基础安全响应头
+
+### 会员与收银
+
+- 生成激活码：`node work/gen-license.mjs --plan pro --days 365 --order ORD20261019001`
+- 私钥 `work/license-private.pem` **不要提交、不要上传、不要发给客户**；丢失后无法再生成可用的新码
+- 价格与免费额度在 `assets/app.js` 顶部的 `COMMERCE`（`gate`、`freeAnalysesPerMonth`、三档价格）
+- 暂不收费：把 `COMMERCE.gate` 改成 `false`，所有功能恢复免费
 
 注意：GitHub Pages 免费版条款不允许把它当作主要面向商业交易或在线业务的免费主机。正式对外收费后，应以 Netlify 域名为准，并考虑关闭 GitHub Pages 镜像或将其改为私有预览。
 
